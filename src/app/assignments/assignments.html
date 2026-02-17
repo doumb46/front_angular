@@ -1,0 +1,34 @@
+<h2>{{titre}}</h2>
+<mat-divider></mat-divider>
+@for(a of assignments; track a.nom) {
+    @if(a.rendu) {
+       <p>
+          {{a.nom}} - a été rendu le {{a.dateDeRendu}}.
+       </p>
+    } @else {
+       <p>
+          {{a.nom}} - n'a pas été rendu, la date de rendu était le {{a.dateDeRendu}}.
+      </p>
+    }
+  <mat-divider></mat-divider>
+}
+
+<h2>Avec tableau</h2>
+<mat-divider></mat-divider>
+<table>
+    <tr>
+        <th>Nom</th>
+        <th>Date de rendu</th>
+        <th>Rendu ?</th>
+    </tr>
+    <tbody>
+@for(assignment of assignments; track assignment.nom) {
+  <tr>
+    <td>{{assignment.nom}}</td>
+    <td>{{assignment.dateDeRendu}}</td>
+    <td>Rendu : {{assignment.rendu ? 'Oui' : 'Non'}}</td>
+    <mat-divider></mat-divider>
+  </tr>
+}
+</tbody>
+</table>
