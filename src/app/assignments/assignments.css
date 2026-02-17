@@ -11,3 +11,19 @@ tr:hover {
     background-color : yellow;
 }
  
+.rendu {
+    background-color : lightgreen;
+    color:blue;
+}
+
+.nonRendu {
+    background-color : lightcoral;
+    color:yellow;
+    border : 2px dashed red;
+}
+
+.form {
+    display:flex;
+    flex-direction: column;
+    margin:20px;
+}

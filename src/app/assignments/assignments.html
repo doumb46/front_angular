@@ -1,19 +1,59 @@
 <h2>{{titre}}</h2>
+<h3>Ajout d'un Assignment</h3>
+<form ngForm 
+      #assignmentForm
+      (submit)="onSubmit($event); assignmentForm.reset()"
+      class="form"
+>
+   <mat-form-field>
+    <mat-form-field>
+        <mat-label>Date de rendu</mat-label>
+            <!-- #docregion toggle -->
+            <input matInput 
+                   [matDatepicker]="picker" 
+                   placeholder = "Date de rendu"
+                   name="dateDeRendu"
+                   [ngModel]="dateDeRendu()" 
+                   (ngModelChange)="dateDeRendu.set($event)"
+            >
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <!-- #enddocregion toggle -->
+       </mat-form-field>
+       <input matInput 
+              name="nomDevoir"
+              [ngModel]="nomDevoir()" 
+              (ngModelChange)="nomDevoir.set($event)"
+              placeholder="Nom du devoir à ajouter"
+        >
+   </mat-form-field>
+
+    <button mat-stroked-button 
+            color="primary"
+            [disabled]="!ajoutActive()"
+    >
+        Ajouter un Assignment
+    </button>
+</form>
+
+
 <mat-divider></mat-divider>
-@for(a of assignments; track a.nom) {
+@for(a of assignments(); track a.nom) {
+    <div>
     @if(a.rendu) {
-       <p>
+       <p appRendu>
           {{a.nom}} - a été rendu le {{a.dateDeRendu}}.
        </p>
     } @else {
-       <p>
+       <p appNonRendu>
           {{a.nom}} - n'a pas été rendu, la date de rendu était le {{a.dateDeRendu}}.
       </p>
     }
+    </div>
   <mat-divider></mat-divider>
 }
 
-<h2>Avec tableau</h2>
+<h2 appImportant>Avec tableau</h2>
 <mat-divider></mat-divider>
 <table>
     <tr>
@@ -22,7 +62,7 @@
         <th>Rendu ?</th>
     </tr>
     <tbody>
-@for(assignment of assignments; track assignment.nom) {
+@for(assignment of assignments(); track assignment.nom) {
   <tr>
     <td>{{assignment.nom}}</td>
     <td>{{assignment.dateDeRendu}}</td>
