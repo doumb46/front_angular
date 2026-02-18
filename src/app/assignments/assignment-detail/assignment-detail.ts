@@ -5,7 +5,7 @@ import {MatCardModule} from '@angular/material/card';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
 
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { Assignment } from '../assignment.model';
 import { AssignmentsService } from '../../shared/assignments.service';
@@ -14,7 +14,8 @@ import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-assignment-detail',
-  imports: [CommonModule, MatCardModule, MatCheckboxModule, MatButtonModule],
+  imports: [CommonModule, MatCardModule, MatCheckboxModule, MatButtonModule, 
+    RouterLink],
   templateUrl: './assignment-detail.html',
   styleUrl: './assignment-detail.css',
 })
@@ -34,8 +35,16 @@ export class AssignmentDetail implements OnInit {
   ngOnInit() {
     console.log("AssignmentDetail ngOnInit called");
     const id = +this.route.snapshot.params['id'];
-
     console.log("id from URL : ", id);
+
+    // Si on veut récupérer les "queries", c'est à dire les paramètres après le "?" dans 
+    // l'URL, on peut faire :
+    const queryParams = this.route.snapshot.queryParams;
+    console.log("query params : ", queryParams);
+
+    // Pour le fragment '#' dans l'URL, on peut faire :
+    const fragment = this.route.snapshot.fragment;
+    console.log("fragment : ", fragment);
 
     // on va chercher dans le service l'assignment avec cet id
     this.assignmentsService.getAssignment(id)

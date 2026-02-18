@@ -21,7 +21,7 @@ import { AssignmentsService } from '../../shared/assignments.service';
   providers: [provideNativeDateAdapter()],
 })
 export class AddAssignment {
-// Pour les champs du formulaire d'ajout d'un devoir
+  // Pour les champs du formulaire d'ajout d'un devoir
   nomDevoir = signal('');
   // Je veux une date de rendu "vide" par défaut
   dateDeRendu = signal(new Date());
