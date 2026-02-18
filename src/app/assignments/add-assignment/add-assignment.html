@@ -1,0 +1,38 @@
+<h3>Ajout d'un Assignment (composant fils)</h3>
+
+<form ngForm 
+      #assignmentForm
+      (submit)="onSubmit($event); assignmentForm.reset()"
+      class="form"
+>
+    <mat-form-field>
+        <mat-label>Date de rendu</mat-label>
+            <!-- #docregion toggle -->
+            <input matInput 
+                   [matDatepicker]="picker" 
+                   placeholder = "Date de rendu"
+                   name="dateDeRendu"
+                   [ngModel]="dateDeRendu()" 
+                   (ngModelChange)="dateDeRendu.set($event)"
+            >
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <!-- #enddocregion toggle -->
+    </mat-form-field>
+
+    <mat-form-field>
+          <mat-label>Nom du devoir</mat-label>
+       <input matInput 
+              name="nomDevoir"
+              [ngModel]="nomDevoir()" 
+              (ngModelChange)="nomDevoir.set($event)"
+              placeholder="Nom du devoir à ajouter"
+        >
+   </mat-form-field>
+
+    <button mat-stroked-button 
+            color="primary"
+    >
+        Ajouter un Assignment
+    </button>
+</form>

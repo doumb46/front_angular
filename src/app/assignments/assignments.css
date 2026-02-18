@@ -22,8 +22,11 @@ tr:hover {
     border : 2px dashed red;
 }
 
-.form {
+.container {
     display:flex;
     flex-direction: column;
-    margin:20px;
+}
+
+.ajoutBtn {
+    align-self: flex-end;
 }

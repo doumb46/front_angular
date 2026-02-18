@@ -3,26 +3,22 @@ import { CommonModule } from '@angular/common';
 
 import { MatDividerModule } from '@angular/material/divider';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatListModule } from '@angular/material/list';
 
 import { provideNativeDateAdapter } from '@angular/material/core';
 
-import { FormsModule } from '@angular/forms';
 
 import { Rendu } from '../shared/rendu';
 import { NonRendu } from '../shared/non-rendu';
 import { ImportantDirective } from '../shared/important.directive';
 import { Assignment } from './assignment.model';
 import { AssignmentDetail } from './assignment-detail/assignment-detail';
+import { AddAssignment } from './add-assignment/add-assignment';
 @Component({
   selector: 'app-assignments',
   imports: [MatDividerModule, Rendu, NonRendu, ImportantDirective,
-    MatButtonModule, FormsModule, MatFormFieldModule, MatInputModule, 
-    MatDatepickerModule, AssignmentDetail, MatListModule,
-    CommonModule
+     AssignmentDetail, MatListModule, MatButtonModule,
+    CommonModule, AddAssignment
   ],
   templateUrl: './assignments.html',
   styleUrl: './assignments.css',
@@ -33,10 +29,8 @@ export class Assignments implements OnInit {
   titre = "Liste des Assignments";
   ajoutActive = signal(true);
 
-  // Pour les champs du formulaire d'ajout d'un devoir
-  nomDevoir = signal('');
-  // Je veux une date de rendu "vide" par défaut
-  dateDeRendu = signal(new Date());
+  // pour cacher/afficher le formulaire d'ajout d'un devoir
+  formVisible = false;
 
   // Pour la transmission vers le composant fils, avec un signal
   //
@@ -101,33 +95,12 @@ export class Assignments implements OnInit {
     }
   }
 
-  onSubmit(event:any) {
-    console.log("Form submitted !!!");
-    // on ajoute () à la fin de this.nomDevoir pour récupérer la valeur 
-    // actuelle du signal !
-    console.log("Nom du devoir : ", this.nomDevoir());
-    console.log("Date de rendu : ", this.dateDeRendu());
-
-    // on peut faire l'ajout :
-    // on crée un nouvel objet de type Assignment
-    const newAssignment= new Assignment();
-    newAssignment.nom = this.nomDevoir();
-    newAssignment.dateDeRendu = this.dateDeRendu();
-    // on ajoute ce nouvel assignment au tableau des assignments
-    this.assignments.update(list => [...list, newAssignment]);
-    
-    // on peut aussi réinitialiser les champs du formulaire
-    // this.nomDevoir.set('');
-    // this.dateDeRendu.set(new Date());
-    //
-    // ou encore : 
-    // on peut faire un reset du formulaire HTML lui même
-    // event.target.reset(); car event.target est le formulaire HTML 
-    // qui a déclenché l'événement de submit
-    //
-    // ou encore : dans le fichier HTML, on peut faire un reset du 
-    // formulaire après le submit :
-    // (submit)="onSubmit($event); assignmentForm.reset()"
+  onAddAssignmentBtnClick() {
+    console.log("Bouton d'ajout cliqué !!!");
+    // on peut faire des traitements pour préparer l'ajout d'un devoir
+    // par exemple, on peut afficher un formulaire pour saisir les 
+    // informations du devoir à ajouter, etc.
+    this.formVisible = true;
   }
 
   assignmentClique(a: Assignment) {
@@ -135,5 +108,13 @@ export class Assignments implements OnInit {
 
     // on met à jour le signal de l'assignment sélectionné
     this.assignmentSelectionne.set(a);
+  }
+
+  ajoutAssignment(assignment: Assignment) {
+    console.log("Assignment à ajouter : ", assignment.nom);
+
+    this.assignments.update(list => [...list, assignment]);
+
+    this.formVisible = false; // on cache le formulaire après l'ajout
   }
 }
