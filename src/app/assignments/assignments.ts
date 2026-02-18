@@ -14,6 +14,7 @@ import { ImportantDirective } from '../shared/important.directive';
 import { Assignment } from './assignment.model';
 import { AssignmentDetail } from './assignment-detail/assignment-detail';
 import { AddAssignment } from './add-assignment/add-assignment';
+import { AssignmentsService } from '../shared/assignments.service';
 @Component({
   selector: 'app-assignments',
   imports: [MatDividerModule, Rendu, NonRendu, ImportantDirective,
@@ -37,26 +38,24 @@ export class Assignments implements OnInit {
   assignmentSelectionne = signal<Assignment | null>(null);
 
   // un tableau avec une liste de devoirs (assignments en anglais)
-  assignments = signal([
-    { 
-      nom: "Devoir Angular de Michel Buffa",
-      dateDeRendu: new Date("2026-04-30"),
-      rendu : false
-    },
-    { 
-      nom: "Devoir Micro Services de Greg Galli !!!",
-      dateDeRendu: new Date("2026-01-15"),
-      rendu : true
-    },
-    { 
-      nom: "Devoir Java EE de Jean Dupont",
-      dateDeRendu: new Date("2026-02-20"),
-      rendu : true
-    }
-  ]);
+  assignments = signal<Assignment[]>([]);
 
+  constructor(private assignmentsService: AssignmentsService) {}
+
+  // appelée à l'initialisation du composant
+  // avant de faire l'affichage
   ngOnInit(): void {
     console.log("ngOnInit appelé !!!");
+
+    this.assignmentsService.getAssignments()
+    .subscribe(assignments => {
+      // on ne rentre ici que lorsque les données observables renvoyées
+      // par getAssignments() sont disponibles, c'est à dire quel'appel 
+      // HTTP est terminé et que les données sont arrivées. 
+      // C'est pour ça que c'est mieux de faire l'appel HTTP dans un service, 
+      // et pas dans le composant, pour gérer l'asynchronicité de l'appel HTTP.
+      this.assignments.set(assignments);
+    });
     /*
     // appelées à l'initialisation du composant
     // avant de faire l'affichage, on peut faire des traitements pour 
@@ -103,6 +102,15 @@ export class Assignments implements OnInit {
     this.formVisible = true;
   }
 
+  onDeleteAssignment(assignment: Assignment) {
+    console.log("delete assignment événement reçu depuis le fils!!!");
+        // On cache le détail en "désélectionnant" l'assignment
+        // on n'a pas pu le faire dans le fils
+        // car le fils a juste un input() pour recevoir l'assignment à afficher, 
+        // mais set ne fonctionnait pas dans le fils
+        this.assignmentSelectionne.set(null);
+  }
+
   assignmentClique(a: Assignment) {
     console.log("Assignment cliqué : ", a.nom);
 
@@ -113,8 +121,11 @@ export class Assignments implements OnInit {
   ajoutAssignment(assignment: Assignment) {
     console.log("Assignment à ajouter : ", assignment.nom);
 
-    this.assignments.update(list => [...list, assignment]);
+    this.assignmentsService.addAssignment(assignment)
+      .subscribe(result => {
+        console.log(result);
 
-    this.formVisible = false; // on cache le formulaire après l'ajout
+        this.formVisible = false; // on cache le formulaire après l'ajout
+      });
   }
 }

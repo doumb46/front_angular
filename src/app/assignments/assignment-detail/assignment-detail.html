@@ -13,13 +13,20 @@
             <p>Date de rendu : {{assignment.dateDeRendu | date:'dd/MM/yyyy'}}</p>
         </mat-card-content>
 
-        <mat-card-actions>
+        <mat-card-actions id="bottom">
             <mat-checkbox 
                 [checked]="assignment.rendu"
                 (click)="onAssignmentRendu()"
             >
                 Rendu
             </mat-checkbox>
+            <button 
+                mat-stroked-button 
+                color="warn"
+                (click)="onDeleteAssignment()"
+            >
+                DELETE
+            </button>
         </mat-card-actions>
     </mat-card>
 }

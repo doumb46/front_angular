@@ -33,6 +33,7 @@
 
     <app-assignment-detail 
         [assignmentTransmis]="assignmentSelectionne()"
+        (deleteAssignment)="onDeleteAssignment($event)"
     >
     </app-assignment-detail>
 }
