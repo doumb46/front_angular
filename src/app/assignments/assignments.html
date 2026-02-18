@@ -30,29 +30,33 @@
 
     <button mat-stroked-button 
             color="primary"
-            [disabled]="!ajoutActive()"
     >
         Ajouter un Assignment
     </button>
 </form>
 
-
 <mat-divider></mat-divider>
+<mat-list></mat-list>
 @for(a of assignments(); track a.nom) {
-    <div>
+    <h3 matList-subheader>{{a.dateDeRendu | date:'dd/MM/yyyy'}}</h3>
+    <mat-list-item (click)="assignmentClique(a);">
+        <div matListItemTitle>{{a.nom}}</div>
     @if(a.rendu) {
-       <p appRendu>
-          {{a.nom}} - a été rendu le {{a.dateDeRendu}}.
+       <p appRendu matListItemLine>A été rendu.
        </p>
     } @else {
-       <p appNonRendu>
-          {{a.nom}} - n'a pas été rendu, la date de rendu était le {{a.dateDeRendu}}.
+       <p appNonRendu matListItemLine>N'a pas été rendu.
       </p>
     }
-    </div>
+    </mat-list-item>
   <mat-divider></mat-divider>
 }
 
+<app-assignment-detail [assignmentTransmis]="assignmentSelectionne()"></app-assignment-detail>
+
+
+
+<!--
 <h2 appImportant>Avec tableau</h2>
 <mat-divider></mat-divider>
 <table>
@@ -72,3 +76,5 @@
 }
 </tbody>
 </table>
+
+-->

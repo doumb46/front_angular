@@ -1,11 +1,14 @@
 import { Component, OnInit, signal,ChangeDetectionStrategy  } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 import { MatDividerModule } from '@angular/material/divider';
 import { MatButtonModule } from '@angular/material/button';
-import {MatDatepickerModule} from '@angular/material/datepicker';
-import {MatInputModule} from '@angular/material/input';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {provideNativeDateAdapter} from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatListModule } from '@angular/material/list';
+
+import { provideNativeDateAdapter } from '@angular/material/core';
 
 import { FormsModule } from '@angular/forms';
 
@@ -13,12 +16,13 @@ import { Rendu } from '../shared/rendu';
 import { NonRendu } from '../shared/non-rendu';
 import { ImportantDirective } from '../shared/important.directive';
 import { Assignment } from './assignment.model';
-
+import { AssignmentDetail } from './assignment-detail/assignment-detail';
 @Component({
   selector: 'app-assignments',
   imports: [MatDividerModule, Rendu, NonRendu, ImportantDirective,
     MatButtonModule, FormsModule, MatFormFieldModule, MatInputModule, 
-    MatDatepickerModule
+    MatDatepickerModule, AssignmentDetail, MatListModule,
+    CommonModule
   ],
   templateUrl: './assignments.html',
   styleUrl: './assignments.css',
@@ -33,6 +37,10 @@ export class Assignments implements OnInit {
   nomDevoir = signal('');
   // Je veux une date de rendu "vide" par défaut
   dateDeRendu = signal(new Date());
+
+  // Pour la transmission vers le composant fils, avec un signal
+  //
+  assignmentSelectionne = signal<Assignment | null>(null);
 
   // un tableau avec une liste de devoirs (assignments en anglais)
   assignments = signal([
@@ -109,7 +117,23 @@ export class Assignments implements OnInit {
     this.assignments.update(list => [...list, newAssignment]);
     
     // on peut aussi réinitialiser les champs du formulaire
-    //this.nomDevoir.set('');
-    //this.dateDeRendu.set(new Date());
+    // this.nomDevoir.set('');
+    // this.dateDeRendu.set(new Date());
+    //
+    // ou encore : 
+    // on peut faire un reset du formulaire HTML lui même
+    // event.target.reset(); car event.target est le formulaire HTML 
+    // qui a déclenché l'événement de submit
+    //
+    // ou encore : dans le fichier HTML, on peut faire un reset du 
+    // formulaire après le submit :
+    // (submit)="onSubmit($event); assignmentForm.reset()"
+  }
+
+  assignmentClique(a: Assignment) {
+    console.log("Assignment cliqué : ", a.nom);
+
+    // on met à jour le signal de l'assignment sélectionné
+    this.assignmentSelectionne.set(a);
   }
 }
