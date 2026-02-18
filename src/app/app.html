@@ -1,2 +1,10 @@
-<h1>Application Angular ESATIC !</h1>
-<app-assignments></app-assignments>
+<h1>
+  <nav>
+    <a routerLink="/home">{{ titre }}</a>
+  </nav>
+</h1>
+
+<!-- la balise suivante dit : "fait le rendu du composant qui 
+ correspond à l'URL (la route) courante. Cette correspondance
+ est définie dans app.routes.ts " -->
+<router-outlet></router-outlet>

@@ -1,42 +1,33 @@
-@if(formVisible) {
-    <app-add-assignment 
-        (assignmentAjoute)="ajoutAssignment($event)"
-    >
-    </app-add-assignment>
-} @else {
-    <div class="container">
-        <button mat-flat-button color="accent"
-            (click)="onAddAssignmentBtnClick()"
-            class="ajoutBtn"
-        >   Ajouter Assignment
-        </button>
-    </div>
 
+    <div class="container">
+        <a routerLink="/add"  class="ajoutBtn">
+            <button mat-flat-button color="accent"
+            >   Ajouter Assignment
+            </button>
+        </a>
+    </div>
 
     <h2>{{titre}}</h2>
     <mat-divider></mat-divider>
     <mat-list></mat-list>
     @for(a of assignments(); track a.nom) {
         <h3 matList-subheader>{{a.dateDeRendu | date:'dd/MM/yyyy'}}</h3>
-        <mat-list-item (click)="assignmentClique(a);">
-            <div matListItemTitle>{{a.nom}}</div>
-        @if(a.rendu) {
-        <p appRendu matListItemLine>A été rendu.
-        </p>
-        } @else {
-        <p appNonRendu matListItemLine>N'a pas été rendu.
-        </p>
-        }
-        </mat-list-item>
-    <mat-divider></mat-divider>
+        <a routerLink="/assignments/{{a.id}}">
+            <mat-list-item >
+                <div matListItemTitle>{{a.nom}}</div>
+                @if(a.rendu) {
+                    <p appRendu matListItemLine>A été rendu.
+                    </p>
+                } @else {
+                    <p appNonRendu matListItemLine>N'a pas été rendu.
+                    </p>
+                }
+            </mat-list-item>
+        </a> 
+        <mat-divider></mat-divider>
     }
 
-    <app-assignment-detail 
-        [assignmentTransmis]="assignmentSelectionne()"
-        (deleteAssignment)="onDeleteAssignment($event)"
-    >
-    </app-assignment-detail>
-}
+
 
 
 <!--

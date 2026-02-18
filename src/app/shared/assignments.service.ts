@@ -11,16 +11,19 @@ export class AssignmentsService {
 
   assignments = [
     {
+      id: 1,
       nom: 'Devoir Angular de Michel Buffa',
       dateDeRendu: new Date('2026-04-30'),
       rendu: false,
     },
     {
+      id: 2,
       nom: 'Devoir Micro Services de Greg Galli !!!',
       dateDeRendu: new Date('2026-01-15'),
       rendu: true,
     },
     {
+      id: 3,
       nom: 'Devoir Java EE de Jean Dupont',
       dateDeRendu: new Date('2026-02-20'),
       rendu: true,
@@ -36,6 +39,12 @@ export class AssignmentsService {
     // l'asynchronicité de l'appel HTTP. La norme en Angular, c'est d'utiliser 
     // des Observables, avec la librairie RxJS.
     return of(this.assignments);
+  }
+
+  // Récupérer un assignment par son id
+  getAssignment(id: number): Observable<Assignment | undefined> {
+    const assignment = this.assignments.find(a => a.id === id);
+    return of(assignment);
   }
 
   addAssignment(assignment: Assignment): Observable<string> {

@@ -1,12 +1,15 @@
-import { Component, input, output } from '@angular/core';
+import { Component, computed, input, OnInit, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import {MatCardModule} from '@angular/material/card';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
 
+import { Router } from '@angular/router';
+
 import { Assignment } from '../assignment.model';
 import { AssignmentsService } from '../../shared/assignments.service';
+import { ActivatedRoute } from '@angular/router';
 
 
 @Component({
@@ -15,50 +18,63 @@ import { AssignmentsService } from '../../shared/assignments.service';
   templateUrl: './assignment-detail.html',
   styleUrl: './assignment-detail.css',
 })
-export class AssignmentDetail {
-  // on récupère le signal de l'assignment sélectionné depuis 
-  // le composant parent. Correspond à [assignmentTransmis]="assignmentSelectionne" dans le template du composant parent
-  // Correspond à l'ancien @Input() assignmentTransmis: Assignment | null = null; dans le composant enfant
-  assignmentTransmis = input<Assignment | null>(null);
+export class AssignmentDetail implements OnInit {
+  private readonly assignmentFromRoute = signal<Assignment | null>(null);
+
+  assignmentAffiche = signal<Assignment | null>(null);
 
   // evenement custom pour deleteAssignment vers le père
   deleteAssignment = output<Assignment>();
 
-  constructor(private assignmentsService: AssignmentsService) {}
+  constructor(private assignmentsService: AssignmentsService,
+              private route: ActivatedRoute,
+              private router: Router
+  ) {}
+
+  ngOnInit() {
+    console.log("AssignmentDetail ngOnInit called");
+    const id = +this.route.snapshot.params['id'];
+
+    console.log("id from URL : ", id);
+
+    // on va chercher dans le service l'assignment avec cet id
+    this.assignmentsService.getAssignment(id)
+    .subscribe(assignment => {
+      console.log("Assignment from service : ", assignment);
+      this.assignmentAffiche.set(assignment ?? null);
+    });
+  };
 
   onAssignmentRendu() {
     // astuce : pour éviter les problèmes de null, 
     // on peut faire un if ou alors utiliser l'opérateur "?" 
-    // pour dire "si assignmentTransmis n'est pas null, 
+    // pour dire "si assignmentAffiche n'est pas null, 
     // ou alors on fait ceci:"
-    const assignment = this.assignmentTransmis();
+    const assignment = this.assignmentAffiche();
 
     if(assignment) {
       assignment.rendu = ! assignment.rendu;
       this.assignmentsService.updateAssignment(assignment).subscribe(result => {
         console.log(result);
+
+        // on va naviguer programmatiquement vers la page d'accueil après la mise à jour,
+        this.router.navigate(['/']);
       });
     }
   }
 
   onDeleteAssignment() {
     // on va devoir envoyer un événement vers le composant parent pour lui dire de supprimer cet assignment de la liste des assignments
-    const assignment = this.assignmentTransmis();
-
-    /*
-    if (assignment) {
-      this.deleteAssignment.emit(assignment);
-    }
-      */
+    const assignment = this.assignmentAffiche();
 
     if (assignment) {
       this.assignmentsService.deleteAssignment(assignment)
       .subscribe(result => {
         console.log(result);
 
-        // On prévient le père pour cacher le détail de l'assignment qui vient 
-        // d'être supprimé
-        this.deleteAssignment.emit(assignment);
+        // on va naviguer programmatiquement vers la page d'accueil après la suppression, 
+        // pour éviter d'avoir une page de détail d'un devoir qui n'existe plus
+        this.router.navigate(['/']);
       });
     }
   }

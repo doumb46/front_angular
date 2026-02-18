@@ -5,8 +5,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 
-import { provideNativeDateAdapter } from '@angular/material/core';
-
+import { RouterLink } from '@angular/router';
 
 import { Rendu } from '../shared/rendu';
 import { NonRendu } from '../shared/non-rendu';
@@ -19,23 +18,15 @@ import { AssignmentsService } from '../shared/assignments.service';
   selector: 'app-assignments',
   imports: [MatDividerModule, Rendu, NonRendu, ImportantDirective,
      AssignmentDetail, MatListModule, MatButtonModule,
-    CommonModule, AddAssignment
+    CommonModule, AddAssignment, RouterLink
   ],
   templateUrl: './assignments.html',
   styleUrl: './assignments.css',
-  providers: [provideNativeDateAdapter()],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Assignments implements OnInit {
   titre = "Liste des Assignments";
   ajoutActive = signal(true);
-
-  // pour cacher/afficher le formulaire d'ajout d'un devoir
-  formVisible = false;
-
-  // Pour la transmission vers le composant fils, avec un signal
-  //
-  assignmentSelectionne = signal<Assignment | null>(null);
 
   // un tableau avec une liste de devoirs (assignments en anglais)
   assignments = signal<Assignment[]>([]);
@@ -92,40 +83,5 @@ export class Assignments implements OnInit {
     } else {
       return 'red';
     }
-  }
-
-  onAddAssignmentBtnClick() {
-    console.log("Bouton d'ajout cliqué !!!");
-    // on peut faire des traitements pour préparer l'ajout d'un devoir
-    // par exemple, on peut afficher un formulaire pour saisir les 
-    // informations du devoir à ajouter, etc.
-    this.formVisible = true;
-  }
-
-  onDeleteAssignment(assignment: Assignment) {
-    console.log("delete assignment événement reçu depuis le fils!!!");
-        // On cache le détail en "désélectionnant" l'assignment
-        // on n'a pas pu le faire dans le fils
-        // car le fils a juste un input() pour recevoir l'assignment à afficher, 
-        // mais set ne fonctionnait pas dans le fils
-        this.assignmentSelectionne.set(null);
-  }
-
-  assignmentClique(a: Assignment) {
-    console.log("Assignment cliqué : ", a.nom);
-
-    // on met à jour le signal de l'assignment sélectionné
-    this.assignmentSelectionne.set(a);
-  }
-
-  ajoutAssignment(assignment: Assignment) {
-    console.log("Assignment à ajouter : ", assignment.nom);
-
-    this.assignmentsService.addAssignment(assignment)
-      .subscribe(result => {
-        console.log(result);
-
-        this.formVisible = false; // on cache le formulaire après l'ajout
-      });
   }
 }

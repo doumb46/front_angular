@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterLink, RouterOutlet } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
@@ -10,10 +10,10 @@ import { Assignments } from './assignments/assignments';
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, MatButtonModule, MatIconModule, 
-    MatDividerModule, Assignments],
+    MatDividerModule, Assignments, RouterLink],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App {
-  titre = "Première application Angular !!!";
+  titre = "Application de gestion des assignments !!!";
 }
