@@ -43,7 +43,7 @@ export class EditAssignment implements OnInit {
 
   getAssignment() {
     // On va utiliser ActivatedRoute pour lire l'id dans l'URL
-    const id = +this.route.snapshot.params['id'];
+    const id = this.route.snapshot.params['id'];
 
     this.assignmentsService.getAssignment(id)
     .subscribe((a) => {

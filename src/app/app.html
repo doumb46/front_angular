@@ -1,10 +1,44 @@
-<h1>
-  <nav>
-    <a routerLink="/home">{{ titre }}</a>
-  </nav>
-</h1>
+<mat-toolbar>
+  <button matIconButton class="example-icon">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <h1>
+      <nav>
+        <a routerLink="/home">{{ titre }}</a>
+      </nav>
+    </h1>
+  <span class="example-spacer"></span>
+  <button matIconButton class="example-icon favorite-icon">
+    <mat-icon>favorite</mat-icon>
+  </button>
+  <button matIconButton class="example-icon">
+    <mat-icon>share</mat-icon>
+  </button>
 
-<!-- la balise suivante dit : "fait le rendu du composant qui 
- correspond à l'URL (la route) courante. Cette correspondance
- est définie dans app.routes.ts " -->
+      <mat-slide-toggle (click)="login()">Login</mat-slide-toggle>
+
+</mat-toolbar>
+
+<mat-sidenav-container class="example-container">
+  <mat-sidenav mode="side" opened class="app-sidenav">
+    
+    <div class="container">
+      <button mat-flat-button color="primary" routerLink="/home">Home</button>
+
+      <a routerLink="/add" class="ajoutBtn">
+        <button mat-flat-button color="accent">Ajouter Assignment</button>
+      </a>
+    </div>
+  </mat-sidenav>
+  <mat-sidenav-content class="app-sidenav-content">
+    
+
+    <!-- la balise suivante dit : "fait le rendu du composant qui 
+    correspond à l'URL (la route) courante. Cette correspondance
+    est définie dans app.routes.ts " -->
 <router-outlet></router-outlet>
+
+  </mat-sidenav-content>
+</mat-sidenav-container>
+
+

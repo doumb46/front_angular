@@ -32,6 +32,7 @@
 
     <button mat-stroked-button 
             color="primary"
+            [disabled]="!dateDeRendu() || !nomDevoir()"
     >
         Ajouter un Assignment
     </button>

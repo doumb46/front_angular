@@ -1,18 +1,9 @@
-
-    <div class="container">
-        <a routerLink="/add"  class="ajoutBtn">
-            <button mat-flat-button color="accent"
-            >   Ajouter Assignment
-            </button>
-        </a>
-    </div>
-
     <h2>{{titre}}</h2>
     <mat-divider></mat-divider>
     <mat-list></mat-list>
     @for(a of assignments(); track a.nom) {
         <h3 matList-subheader>{{a.dateDeRendu | date:'dd/MM/yyyy'}}</h3>
-        <a routerLink="/assignments/{{a.id}}">
+        <a routerLink="/assignments/{{a._id}}">
             <mat-list-item >
                 <div matListItemTitle>{{a.nom}}</div>
                 @if(a.rendu) {

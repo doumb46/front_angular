@@ -2,33 +2,18 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { Assignment } from '../assignments/assignment.model';
 import { LoggingService } from './logging.service';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AssignmentsService {
-  constructor(private loggingService: LoggingService) {}
+  constructor(private loggingService: LoggingService,
+              private http: HttpClient) {}
 
-  assignments = [
-    {
-      id: 1,
-      nom: 'Devoir Angular de Michel Buffa',
-      dateDeRendu: new Date('2026-04-30'),
-      rendu: false,
-    },
-    {
-      id: 2,
-      nom: 'Devoir Micro Services de Greg Galli !!!',
-      dateDeRendu: new Date('2026-01-15'),
-      rendu: true,
-    },
-    {
-      id: 3,
-      nom: 'Devoir Java EE de Jean Dupont',
-      dateDeRendu: new Date('2026-02-20'),
-      rendu: true,
-    },
-  ];
+  assignments:Assignment[] = [];
+
+  URI_BACKEND = 'http://localhost:8010/api/assignments';
 
   getAssignments():Observable<Assignment[]> {
     // typiquement : on ferait un appel HTTP vers un backend pour 
@@ -38,24 +23,26 @@ export class AssignmentsService {
     // mais plutôt un Observable ou une Promise, pour gérer 
     // l'asynchronicité de l'appel HTTP. La norme en Angular, c'est d'utiliser 
     // des Observables, avec la librairie RxJS.
-    return of(this.assignments);
+    //return of(this.assignments);
+    return this.http.get<Assignment[]>(this.URI_BACKEND);
   }
 
   // Récupérer un assignment par son id
   getAssignment(id: number): Observable<Assignment | undefined> {
-    const assignment = this.assignments.find(a => a.id === id);
-    return of(assignment);
+    //const assignment = this.assignments.find(a => a.id === id);
+    //return of(assignment);
+    return this.http.get<Assignment>(this.URI_BACKEND + '/' + id);
   }
 
-  addAssignment(assignment: Assignment): Observable<string> {
+  addAssignment(assignment: Assignment): Observable<any> {
     this.assignments.push(assignment);
 
     this.loggingService.log(assignment.nom, 'ajouté');
 
-    return of('Assignment ajouté avec succès !');
+    return this.http.post<any>(this.URI_BACKEND, assignment);
   }
 
-  updateAssignment(assignment: Assignment): Observable<string> {
+  updateAssignment(assignment: Assignment): Observable<any> {
     // dans une vraie application, on ferait un appel HTTP PUT 
     // vers le backend pour mettre à jour l'assignment, 
     // et on gérerait la réponse du backend pour savoir si la mise à jour 
@@ -64,19 +51,20 @@ export class AssignmentsService {
 
       this.loggingService.log(assignment.nom, 'mis à jour');
 
-      return of('Assignment mis à jour dans le service !');
+      return this.http.put<any>(this.URI_BACKEND, assignment);
   }
 
-  deleteAssignment(assignment: Assignment): Observable<string> {
+  deleteAssignment(assignment: Assignment): Observable<any> {
     // on supprime avec splice() l'assignment du tableau des assignments
     // car avec filter cela crée un nouveau tableau et du coup ça ne 
     // fonctionne pas car le signal référence toujours l'ancien
     //  dans le composant parent. Donc -> utiliser splice
-    const pos = this.assignments.indexOf(assignment);
-    this.assignments.splice(pos, 1);
+    //const pos = this.assignments.indexOf(assignment);
+    //this.assignments.splice(pos, 1);
 
     this.loggingService.log(assignment.nom, 'supprimé');
     
-    return of('Assignment supprimé avec succès !');
+    //return of('Assignment supprimé avec succès !');
+    return this.http.delete<any>(this.URI_BACKEND + '/' + assignment._id);
   }
 }

@@ -1,4 +1,3 @@
-ASSIGNMENT DETAIL !!!
 <!-- on affiche la valeur du signal assignmentTransmis -->
 <!-- ASTUCE : avec le as on peut garder une écriture compacte
   pour accèder aux propriétés de l'objet reçu en tant que signal -->
@@ -26,6 +25,7 @@ ASSIGNMENT DETAIL !!!
                 <button 
                     mat-stroked-button 
                     color="primary"
+                    [disabled]="!isAdmin()"
                 >
                     EDIT
                 </button>

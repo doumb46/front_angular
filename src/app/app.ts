@@ -1,19 +1,37 @@
 import { Component, signal } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {MatDividerModule} from '@angular/material/divider';
-
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { Assignments } from './assignments/assignments';
+import { AuthService } from './shared/auth.service';
 
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, MatButtonModule, MatIconModule, 
-    MatDividerModule, Assignments, RouterLink],
+    MatDividerModule, Assignments, RouterLink, MatSlideToggleModule,
+    MatToolbarModule, MatSidenavModule],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App {
   titre = "Application de gestion des assignments !!!";
+
+  constructor(private authService: AuthService,
+              private router: Router) {}
+
+  login() {
+    // loggue / deloggue l'utilisateur
+    if(this.authService.isLoggedIn()) {
+      this.authService.logOut();
+      // et on revient à la page d'accueil après le logout
+      //this.router.navigate(['/home']);
+    } else {
+      this.authService.logIn();
+    }
+  }
 }

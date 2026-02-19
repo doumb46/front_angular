@@ -10,6 +10,7 @@ import { Router, RouterLink } from '@angular/router';
 import { Assignment } from '../assignment.model';
 import { AssignmentsService } from '../../shared/assignments.service';
 import { ActivatedRoute } from '@angular/router';
+import { AuthService } from '../../shared/auth.service';
 
 
 @Component({
@@ -28,13 +29,14 @@ export class AssignmentDetail implements OnInit {
   deleteAssignment = output<Assignment>();
 
   constructor(private assignmentsService: AssignmentsService,
+              private authService: AuthService,
               private route: ActivatedRoute,
               private router: Router
   ) {}
 
   ngOnInit() {
     console.log("AssignmentDetail ngOnInit called");
-    const id = +this.route.snapshot.params['id'];
+    const id = this.route.snapshot.params['id'];
     console.log("id from URL : ", id);
 
     // Si on veut récupérer les "queries", c'est à dire les paramètres après le "?" dans 
@@ -49,7 +51,7 @@ export class AssignmentDetail implements OnInit {
     // on va chercher dans le service l'assignment avec cet id
     this.assignmentsService.getAssignment(id)
     .subscribe(assignment => {
-      console.log("Assignment from service : ", assignment);
+      //console.log("Assignment from service : ", assignment);
       this.assignmentAffiche.set(assignment ?? null);
     });
   };
@@ -86,5 +88,9 @@ export class AssignmentDetail implements OnInit {
         this.router.navigate(['/']);
       });
     }
+  }
+
+  isAdmin() {
+    return this.authService.loggedIn;
   }
 }

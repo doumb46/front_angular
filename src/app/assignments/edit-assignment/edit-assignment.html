@@ -1,4 +1,3 @@
-EDIT
 @if(assignementAffiche(); as assignment) {
     <div class="container">
     <h1>Edition de l'assignment {{assignment.nom}}</h1>
@@ -31,7 +30,8 @@ EDIT
             <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>
         <button mat-raised-button 
-                color="primary" 
+                color="primary"
+                [disabled]="!dateDeRendu() || !nomDevoir()"
         >
         Sauver
         </button>

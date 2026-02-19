@@ -51,11 +51,7 @@ export class AddAssignment {
       newAssignment.nom = this.nomDevoir();
       newAssignment.dateDeRendu = this.dateDeRendu();
       newAssignment.rendu = false; 
-      // pour générer un id aléatoire, à remplacer 
-      // par un vrai id généré par le backend dans une 
-      // vraie application
-      newAssignment.id = Math.floor(Math.random() * 1000000); 
-
+   
       // On utilise le service pour ajouter le devoir à la liste des devoirs
       this.assignementService.addAssignment(newAssignment)
       .subscribe(result => {
