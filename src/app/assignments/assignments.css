@@ -30,3 +30,23 @@ tr:hover {
 .ajoutBtn {
     align-self: flex-end;
 }
+
+.mat-column-assignment-nom {
+    width:50%;
+  border-right: 1px solid currentColor;
+  padding-right: 24px;
+  text-align: left;
+}
+
+.mat-column-assignment-dateDeRendu {
+    width:auto;
+  font-style: italic;
+  text-align: center;
+}
+
+
+.mat-column-assignment-rendu {
+  width: 100px;
+  text-align: center;
+  font-weight: bold;
+}

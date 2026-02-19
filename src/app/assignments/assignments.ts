@@ -1,9 +1,11 @@
-import { Component, OnInit, signal,ChangeDetectionStrategy  } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { MatDividerModule } from '@angular/material/divider';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 import { RouterLink } from '@angular/router';
 
@@ -16,17 +18,42 @@ import { AddAssignment } from './add-assignment/add-assignment';
 import { AssignmentsService } from '../shared/assignments.service';
 @Component({
   selector: 'app-assignments',
-  imports: [MatDividerModule, Rendu, NonRendu, ImportantDirective,
-     AssignmentDetail, MatListModule, MatButtonModule,
-    CommonModule, AddAssignment, RouterLink
+  imports: [
+    MatDividerModule,
+    Rendu,
+    NonRendu,
+    ImportantDirective,
+    AssignmentDetail,
+    MatListModule,
+    MatButtonModule,
+    CommonModule,
+    AddAssignment,
+    RouterLink,
+    MatTableModule,
+    MatPaginatorModule
   ],
   templateUrl: './assignments.html',
   styleUrl: './assignments.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Assignments implements OnInit {
-  titre = "Liste des Assignments";
+  titre = 'Liste des Assignments';
   ajoutActive = signal(true);
+
+  // Pour la pagination
+  page: number = 1;
+  limit: number = 10;
+  totalDocs: number = 0;
+  totalPages: number = 0;
+  pagingCounter: number = 1;
+  hasPrevPage: boolean = false;
+  hasNextPage: boolean = false;
+  prevPage:number = 1;
+  nextPage: number = 1;
+
+  // Pour la data table
+  displayedColumns: string[] = ['assignment-nom', 'assignment-dateDeRendu', 'assignment-rendu'];
+
 
   // un tableau avec une liste de devoirs (assignments en anglais)
   assignments = signal<Assignment[]>([]);
@@ -36,17 +63,9 @@ export class Assignments implements OnInit {
   // appelée à l'initialisation du composant
   // avant de faire l'affichage
   ngOnInit(): void {
-    console.log("ngOnInit appelé !!!");
-
-    this.assignmentsService.getAssignments()
-    .subscribe(assignments => {
-      // on ne rentre ici que lorsque les données observables renvoyées
-      // par getAssignments() sont disponibles, c'est à dire quel'appel 
-      // HTTP est terminé et que les données sont arrivées. 
-      // C'est pour ça que c'est mieux de faire l'appel HTTP dans un service, 
-      // et pas dans le composant, pour gérer l'asynchronicité de l'appel HTTP.
-      this.assignments.set(assignments);
-    });
+    console.log('ngOnInit appelé !!!');
+    this.getAssignments();
+   
     /*
     // appelées à l'initialisation du composant
     // avant de faire l'affichage, on peut faire des traitements pour 
@@ -74,8 +93,27 @@ export class Assignments implements OnInit {
     */
   }
 
-  // any = en typescript, c'est un type générique qui peut représenter 
-  // n'importe quel type de données. Typiquement, on l'utilise lorsque 
+  getAssignments() {
+     this.assignmentsService.getAssignmentsPagine(this.page, this.limit)
+    .subscribe((data) => {
+      this.totalDocs = data.totalDocs;
+      this.totalPages = data.totalPages;
+      this.pagingCounter = data.pagingCounter;
+      this.hasPrevPage = data.hasPrevPage;
+      this.hasNextPage = data.hasNextPage;
+      this.prevPage = data.prevPage;
+      this.nextPage = data.nextPage;
+      // on ne rentre ici que lorsque les données observables renvoyées
+      // par getAssignments() sont disponibles, c'est à dire quel'appel
+      // HTTP est terminé et que les données sont arrivées.
+      // C'est pour ça que c'est mieux de faire l'appel HTTP dans un service,
+      // et pas dans le composant, pour gérer l'asynchronicité de l'appel HTTP.
+      this.assignments.set(data.docs);
+    });
+  }
+
+  // any = en typescript, c'est un type générique qui peut représenter
+  // n'importe quel type de données. Typiquement, on l'utilise lorsque
   // le type de données n'est pas connu à l'avance ou peut varier.
   getColor(assignment: any) {
     if (assignment.rendu) {
@@ -83,5 +121,43 @@ export class Assignments implements OnInit {
     } else {
       return 'red';
     }
+  }
+
+  premierePage() {
+    this.page = 1;
+    this.getAssignments();
+  }
+
+  dernierePage() {
+    this.page = this.totalPages;
+    this.getAssignments();
+  }
+
+  pageSuivante() {
+    if (this.hasNextPage) {
+      this.page = this.nextPage;
+      this.getAssignments();
+    }
+  }
+
+  pagePrecedente() {
+    if (this.hasPrevPage) {
+      this.page = this.prevPage;
+      this.getAssignments();
+    }
+  }
+
+  changeNbAssignmentsParPage(nb: string) {
+    this.limit = parseInt(nb);
+    this.getAssignments();
+  }
+
+  // Appelé par le composant Paginator de Angular Material quand on change 
+  // de page
+  pageChange(event: any) {
+    console.log("Page changed : ", event);
+    this.limit = event.pageSize;
+    this.page = event.pageIndex + 1;
+    this.getAssignments();
   }
 }

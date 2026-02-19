@@ -1,4 +1,85 @@
     <h2>{{titre}}</h2>
+    <ul>
+        <li>Page courante : {{page}} / {{totalPages}}</li>
+        <li>Nb assignements total : {{totalDocs}}</li>
+        <li>Nb assignments par page : 
+            <input type="range" min="1" max="100"
+                    value = {{limit}}
+                   (input)="changeNbAssignmentsParPage($event.target.value)"
+            > 
+            {{limit}}</li>
+
+    </ul>
+    <button mat-flat-button color="primary" 
+            (click)="premierePage()"
+    >
+            Première page
+    </button>
+    &nbsp; &nbsp;
+    <button mat-flat-button color="primary" 
+            (click)="pagePrecedente()"
+    >
+            Page précédente
+    </button>
+    &nbsp; &nbsp;
+    <button mat-flat-button color="primary" 
+            (click)="pageSuivante()"
+    >
+            Page suivante
+    </button>
+    &nbsp; &nbsp;
+    <button mat-flat-button color="primary" 
+            (click)="dernierePage()"
+    >
+            Dernière page
+    </button>
+
+    <mat-paginator [length]="totalDocs"
+                   [pageSize]="limit"
+                   (page)="pageChange($event)"
+                   showFirstLastButtons = "true"
+                   [pageIndex]="page - 1"
+                   [pageSizeOptions]="[5, 10, 25, 100]"
+                   aria-label="Select page"
+        >
+    </mat-paginator>
+
+    <table mat-table 
+           [dataSource]="assignments()" class="mat-elevation-z8 demo-table"
+    >
+ 
+        <!-- nom Column -->
+        <ng-container matColumnDef="assignment-nom">
+          <th mat-header-cell *matHeaderCellDef> Nom </th>
+          <td mat-cell *matCellDef="let element"> {{element.nom}} </td>
+        </ng-container>
+
+        <!-- dateDeRendu Column -->
+        <ng-container matColumnDef="assignment-dateDeRendu">
+            <th mat-header-cell *matHeaderCellDef> Date de rendu </th>
+            <td mat-cell *matCellDef="let element"> {{element.dateDeRendu | date:'dd/MM/yyyy'}} </td>
+        </ng-container>
+
+  <!-- rendu Column -->
+  <ng-container matColumnDef="assignment-rendu">
+    <th mat-header-cell *matHeaderCellDef> Rendu ? </th>
+    <td mat-cell *matCellDef="let element"> {{element.rendu ? 'Oui' : 'Non'}} </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>
+<mat-paginator [length]="totalDocs"
+                   [pageSize]="limit"
+                   (page)="pageChange($event)"
+                   showFirstLastButtons = "true"
+                   [pageIndex]="page - 1"
+                   [pageSizeOptions]="[5, 10, 25, 100]"
+                   aria-label="Select page"
+        >
+    </mat-paginator>
+
+
     <mat-divider></mat-divider>
     <mat-list></mat-list>
     @for(a of assignments(); track a.nom) {
@@ -17,10 +98,6 @@
         </a> 
         <mat-divider></mat-divider>
     }
-
-
-
-
 <!--
 <h2 appImportant>Avec tableau</h2>
 <mat-divider></mat-divider>
