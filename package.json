@@ -3,10 +3,11 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "start": "node scripts/generate-env.mjs && ng serve",
+    "build": "node scripts/generate-env.mjs && ng build",
+    "watch": "node scripts/generate-env.mjs && ng build --watch --configuration development",
+    "test": "node scripts/generate-env.mjs && ng test",
+    "postinstall": "node scripts/generate-env.mjs"
   },
   "prettier": {
     "printWidth": 100,
@@ -39,6 +40,7 @@
     "@angular/cli": "^21.1.4",
     "@angular/compiler-cli": "^21.1.0",
     "@angular/material": "^21.1.4",
+    "dotenv": "^16.4.7",
     "jsdom": "^27.1.0",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"

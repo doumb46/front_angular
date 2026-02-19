@@ -4,6 +4,7 @@ import { Assignment } from '../assignments/assignment.model';
 import { LoggingService } from './logging.service';
 import { HttpClient } from '@angular/common/http';
 import bdInitialAssignments from './data';
+import { APP_ENV } from './app-env';
 
 @Injectable({
   providedIn: 'root',
@@ -16,7 +17,7 @@ export class AssignmentsService {
 
   assignments: Assignment[] = [];
 
-  URI_BACKEND = 'http://localhost:8010/api/assignments';
+  URI_BACKEND = APP_ENV.assignmentsApiUrl;
 
   getAssignments(): Observable<Assignment[]> {
     // typiquement : on ferait un appel HTTP vers un backend pour

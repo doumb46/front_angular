@@ -11,6 +11,12 @@
 npm-debug.log
 yarn-error.log
 
+# Env (secrets / config locale)
+.env
+
+# Généré depuis .env (ne pas committer)
+src/app/shared/app-env.ts
+
 # IDEs and editors
 .idea/
 .project
