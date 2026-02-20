@@ -8,10 +8,20 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 To start a local development server, run:
 
 ```bash
-ng serve
+npm run startdev
 ```
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+
+## Configuration (backend URI)
+
+This project does **not** commit `.env` to GitHub (secrets / local config).
+
+- Local dev: create `./.env` from `./.env.example` and set:
+	- `ASSIGNMENTS_API_URL=http://localhost:8010/api/assignments`
+- Render.com (deploy): set the same value as an **Environment Variable** in the Render dashboard.
+
+The build generates `src/app/shared/app-env.ts` from environment variables (Render/CI) or from `.env` (local).
 
 ## Code scaffolding
 
