@@ -7,7 +7,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { Rendu } from '../shared/rendu';
 import { NonRendu } from '../shared/non-rendu';
@@ -58,7 +58,8 @@ export class Assignments implements OnInit {
   // un tableau avec une liste de devoirs (assignments en anglais)
   assignments = signal<Assignment[]>([]);
 
-  constructor(private assignmentsService: AssignmentsService) {}
+  constructor(private assignmentsService: AssignmentsService,
+              private router: Router) {}
 
   // appelée à l'initialisation du composant
   // avant de faire l'affichage
@@ -159,5 +160,11 @@ export class Assignments implements OnInit {
     this.limit = event.pageSize;
     this.page = event.pageIndex + 1;
     this.getAssignments();
+  }
+
+  // Pour gérer le click sur les lignes du tableau (tr)
+  onRowClick(row: any) {
+    console.log("Row clicked : ", row);
+    this.router.navigate(['/assignments', row._id]);
   }
 }
