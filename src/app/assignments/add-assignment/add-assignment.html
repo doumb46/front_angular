@@ -1,39 +1,122 @@
-<h3>Ajout d'un Assignment (composant fils)</h3>
+<div class="form-page">
+  <mat-card class="form-card">
+    <mat-card-header>
+      <mat-icon mat-card-avatar class="header-icon">add_task</mat-icon>
+      <mat-card-title>Ajouter un Assignment</mat-card-title>
+      <mat-card-subtitle>Remplissez les informations du devoir</mat-card-subtitle>
+    </mat-card-header>
 
-<form ngForm 
-      #assignmentForm
-      (submit)="onSubmit($event); assignmentForm.reset()"
-      class="form"
->
-    <mat-form-field>
-        <mat-label>Date de rendu</mat-label>
-            <!-- #docregion toggle -->
-            <input matInput 
-                   [matDatepicker]="picker" 
-                   placeholder = "Date de rendu"
-                   name="date"
-                   [ngModel]="dateDeRendu()" 
-                   (ngModelChange)="dateDeRendu.set($event)"
-            >
-            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-            <!-- #enddocregion toggle -->
-    </mat-form-field>
+    <mat-card-content>
+      @if(erreur()) {
+        <div class="error-banner">
+          <mat-icon>error</mat-icon> {{ erreur() }}
+        </div>
+      }
 
-    <mat-form-field>
-          <mat-label>Nom du devoir</mat-label>
-       <input matInput 
-              name="nomDevoir"
-              [ngModel]="nomDevoir()" 
-              (ngModelChange)="nomDevoir.set($event)"
-              placeholder="Nom du devoir à ajouter"
-        >
-   </mat-form-field>
+      <form (ngSubmit)="onSubmit()" class="form-grid">
 
-    <button mat-stroked-button 
-            color="primary"
-            [disabled]="!dateDeRendu() || !nomDevoir()"
-    >
-        Ajouter un Assignment
-    </button>
-</form>
+        <!-- ── Section Élève ── -->
+        <div class="section-title">
+          <mat-icon>person</mat-icon> Informations de l'élève
+        </div>
+
+        <mat-form-field appearance="outline" class="span-2">
+          <mat-label>Nom de l'élève (Auteur)</mat-label>
+          <mat-icon matPrefix>badge</mat-icon>
+          <input matInput name="auteur"
+                 [ngModel]="auteur()" (ngModelChange)="auteur.set($event)"
+                 placeholder="Ex : Jean-Marc Koné" />
+        </mat-form-field>
+
+        <!-- ── Section Devoir ── -->
+        <div class="section-title span-2">
+          <mat-icon>description</mat-icon> Détails du devoir
+        </div>
+
+        <mat-form-field appearance="outline" class="span-2">
+          <mat-label>Nom du devoir *</mat-label>
+          <mat-icon matPrefix>title</mat-icon>
+          <input matInput name="nom"
+                 [ngModel]="nom()" (ngModelChange)="nom.set($event)"
+                 placeholder="Ex : TP Bases de données – Requêtes SQL" required />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Date de rendu *</mat-label>
+          <mat-icon matPrefix>event</mat-icon>
+          <input matInput [matDatepicker]="picker" name="date"
+                 [ngModel]="dateDeRendu()" (ngModelChange)="dateDeRendu.set($event)"
+                 placeholder="JJ/MM/AAAA" required />
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+
+        <!-- Sélecteur matière -->
+        <mat-form-field appearance="outline">
+          <mat-label>Matière</mat-label>
+          <mat-icon matPrefix>school</mat-icon>
+          <mat-select name="matiere"
+                      [ngModel]="matiereChoisie()"
+                      (ngModelChange)="onMatiereChange($event)">
+            @for(m of matieres; track m.nom) {
+              <mat-option [value]="m">
+                <div class="matiere-option">
+                  <img [src]="m.image" class="opt-icon" [alt]="m.nom" />
+                  {{ m.nom }}
+                </div>
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Preview matière choisie -->
+        @if(matiereChoisie(); as m) {
+          <div class="matiere-preview span-2">
+            <img [src]="m.image" class="preview-matiere-img" [alt]="m.nom" />
+            <div class="preview-info">
+              <div class="preview-matiere-nom">{{ m.nom }}</div>
+              <div class="preview-prof">
+                <img [src]="m.photoProf" class="preview-prof-img" [alt]="m.prof" />
+                <span>{{ m.prof }}</span>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- ── Section Évaluation ── -->
+        <div class="section-title span-2">
+          <mat-icon>grade</mat-icon> Évaluation
+        </div>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Note /20 (optionnel)</mat-label>
+          <mat-icon matPrefix>star</mat-icon>
+          <input matInput type="number" name="note" min="0" max="20"
+                 [ngModel]="note()" (ngModelChange)="note.set($event !== '' ? +$event : null)"
+                 placeholder="0 – 20" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="span-2">
+          <mat-label>Remarques</mat-label>
+          <mat-icon matPrefix>comment</mat-icon>
+          <textarea matInput name="remarques" rows="3"
+                    [ngModel]="remarques()" (ngModelChange)="remarques.set($event)"
+                    placeholder="Observations, consignes particulières…"></textarea>
+        </mat-form-field>
+
+        <!-- Actions -->
+        <div class="form-actions span-2">
+          <button mat-stroked-button type="button" (click)="annuler()">
+            <mat-icon>close</mat-icon> Annuler
+          </button>
+          <button mat-flat-button color="primary" type="submit"
+                  [disabled]="!nom() || !dateDeRendu() || envoiEnCours()">
+            <mat-icon>save</mat-icon>
+            {{ envoiEnCours() ? 'Enregistrement…' : 'Enregistrer' }}
+          </button>
+        </div>
+
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,5 +1,5 @@
 const bdInitialAssignments = [
-    {"nom":"Butter Ripple - Phillips","dateDeRendu":"2026-04-08","rendu":false},
+  {"nom":"Butter Ripple - Phillips","dateDeRendu":"2026-04-08","rendu":false},
 {"nom":"Remy Red","dateDeRendu":"2026-10-02","rendu":false},
 {"nom":"Ranchero - Primerba, Paste","dateDeRendu":"2026-07-18","rendu":true},
 {"nom":"Bandage - Flexible Neon","dateDeRendu":"2026-06-16","rendu":false},

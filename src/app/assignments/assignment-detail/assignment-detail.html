@@ -1,43 +1,139 @@
-<!-- on affiche la valeur du signal assignmentTransmis -->
-<!-- ASTUCE : avec le as on peut garder une écriture compacte
-  pour accèder aux propriétés de l'objet reçu en tant que signal -->
-@if(assignmentAffiche(); as assignment) {
-    <mat-card appearance="outlined">
+@if(assignment(); as a) {
+  <div class="detail-page">
+
+    <!-- En-tête avec bouton retour -->
+    <div class="detail-top-bar">
+      <button mat-stroked-button routerLink="/home">
+        <mat-icon>arrow_back</mat-icon> Retour à la liste
+      </button>
+      @if(authService.isAdmin()){
+      <div class="top-actions">
+
+        <button mat-stroked-button color="primary"
+                [disabled]="!authService.isAdmin()"
+                [matTooltip]="!authService.isAdmin() ? 'Réservé à l\'admin' : 'Modifier'"
+                (click)="onEdit()">
+          <mat-icon>edit</mat-icon> Modifier
+        </button>
+        <button mat-stroked-button color="warn"
+                [disabled]="!authService.isAdmin()"
+                [matTooltip]="!authService.isAdmin() ? 'Réservé à l\'admin' : 'Supprimer'"
+                (click)="onDelete()">
+          <mat-icon>delete</mat-icon> Supprimer
+        </button>
+      </div>
+      }
+    </div>
+
+    <div class="detail-layout">
+
+      <!-- Carte principale -->
+      <mat-card class="main-card">
         <mat-card-header>
-           <mat-card-title>Détails de l'assignment</mat-card-title>
-           <mat-card-subtitle>On pourra ajouter image etc.</mat-card-subtitle>
+          <div class="main-header">
+            <!-- Matière -->
+            @if(a.imageMatiere) {
+              <img [src]="a.imageMatiere" class="matiere-banner-img" [alt]="a.matiere" />
+            }
+            <div class="header-text">
+              <div class="matiere-label">{{ a.matiere || 'Matière non définie' }}</div>
+              <h2 class="devoir-titre">{{ a.nom }}</h2>
+              <div class="status-row">
+                <span class="status-chip" [class.chip-rendu]="a.rendu" [class.chip-non-rendu]="!a.rendu">
+                  <mat-icon>{{ a.rendu ? 'check_circle' : 'schedule' }}</mat-icon>
+                  {{ a.rendu ? 'Rendu' : 'En attente' }}
+                </span>
+                <span class="date-chip">
+                  <mat-icon>event</mat-icon>
+                  {{ a.dateDeRendu | date:'dd MMMM yyyy':'':'fr' }}
+                </span>
+              </div>
+            </div>
+          </div>
         </mat-card-header>
 
-        <mat-card-content>
-            <p>Nom : {{assignment.nom}}</p>
-            <p>Date de rendu : {{assignment.dateDeRendu | date:'dd/MM/yyyy'}}</p>
+        <mat-divider></mat-divider>
+
+        <mat-card-content class="content-grid">
+
+          <!-- Auteur -->
+          <div class="info-section">
+            <div class="info-label"><mat-icon>person</mat-icon> Élève</div>
+            <div class="info-value author-row">
+              @if(a.photoAuteur) {
+                <img [src]="a.photoAuteur" class="avatar-md" [alt]="a.auteur" />
+              } @else {
+                <mat-icon class="avatar-icon-lg">account_circle</mat-icon>
+              }
+              <span>{{ a.auteur || '—' }}</span>
+            </div>
+          </div>
+
+          <!-- Note -->
+          <div class="info-section">
+            <div class="info-label"><mat-icon>grade</mat-icon> Note</div>
+            <div class="info-value note-display">
+              @if(a.note !== null && a.note !== undefined) {
+                <span class="note-circle" [style.background]="getNoteColor(a.note)">
+                  {{ a.note }}/20
+                </span>
+                <span class="note-mention" [style.color]="getNoteColor(a.note)">
+                  {{ getNoteLabel(a.note) }}
+                </span>
+              } @else {
+                <span class="not-yet">Non noté</span>
+              }
+            </div>
+          </div>
+
+          <!-- Prof -->
+          <div class="info-section">
+            <div class="info-label"><mat-icon>school</mat-icon> Professeur</div>
+            <div class="info-value author-row">
+              @if(a.photoProf) {
+                <img [src]="a.photoProf" class="avatar-md" [alt]="a.nomProf" />
+              }
+              <span>{{ a.nomProf || '—' }}</span>
+            </div>
+          </div>
+
+          <!-- Remarques -->
+          @if(a.remarques) {
+            <div class="info-section span-2">
+              <div class="info-label"><mat-icon>comment</mat-icon> Remarques</div>
+              <div class="info-value remarques-box">{{ a.remarques }}</div>
+            </div>
+          }
+
         </mat-card-content>
 
-        <mat-card-actions id="bottom">
-            <mat-checkbox 
-                [checked]="assignment.rendu"
-                (click)="onAssignmentRendu()"
-            >
-                Rendu
-            </mat-checkbox>
+        <mat-divider></mat-divider>
 
-            <a routerLink="edit">
-                <button 
-                    mat-stroked-button 
-                    color="primary"
-                    [disabled]="!isAdmin()"
-                >
-                    EDIT
-                </button>
-            </a>
-
-            <button 
-                mat-stroked-button 
-                color="warn"
-                (click)="onDeleteAssignment()"
-            >
-                DELETE
-            </button>
+        <mat-card-actions class="card-actions">
+          <mat-checkbox
+            [checked]="a.rendu"
+            (change)="onToggleRendu()"
+            [disabled]="!authService.isLogged()"
+            [matTooltip]="(a.note === null || a.note === undefined) && !a.rendu
+              ? 'Une note est requise pour marquer comme rendu'
+              : (a.rendu ? 'Marquer comme non rendu' : 'Marquer comme rendu')">
+            Marquer comme rendu
+          </mat-checkbox>
+          @if((a.note === null || a.note === undefined) && !a.rendu) {
+            <span class="rendu-hint">
+              <mat-icon>info</mat-icon> Attribution d'une note requise
+            </span>
+          }
         </mat-card-actions>
-    </mat-card>
+      </mat-card>
+
+    </div>
+  </div>
+}
+
+@if(!assignment()) {
+  <div class="loading-state">
+    <mat-icon>hourglass_empty</mat-icon>
+    <p>Chargement de l'assignment…</p>
+  </div>
 }

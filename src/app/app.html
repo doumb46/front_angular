@@ -1,49 +1,83 @@
-<mat-toolbar>
-  <button matIconButton class="example-icon">
-    <mat-icon>menu</mat-icon>
-  </button>
-  <h1>
-      <nav>
-        <a routerLink="/home">{{ titre }}</a>
-      </nav>
-    </h1>
-  <span class="example-spacer"></span>
-  <button matIconButton class="example-icon favorite-icon">
-    <mat-icon>favorite</mat-icon>
-  </button>
-  <button matIconButton class="example-icon">
-    <mat-icon>share</mat-icon>
-  </button>
+<mat-toolbar color="primary" class="app-toolbar">
+  <mat-icon class="toolbar-logo">school</mat-icon>
+  <span class="toolbar-title">
+    <a routerLink="/home" class="toolbar-link">Assignments ESATIC</a>
+  </span>
+  <span class="spacer"></span>
 
-      <mat-slide-toggle (click)="login()">Login</mat-slide-toggle>
-
+  @if(authService.isLogged()) {
+    <div class="user-info">
+      <mat-icon>account_circle</mat-icon>
+      <span class="user-name">
+        {{ authService.getCurrentUser()?.nom || authService.getCurrentUser()?.login }}
+      </span>
+      @if(authService.isAdmin()) {
+        <span class="badge-admin">ADMIN</span>
+      }
+    </div>
+    <button mat-stroked-button class="btn-logout" (click)="logout()">
+      <mat-icon>logout</mat-icon> Déconnexion
+    </button>
+  } @else {
+    <button mat-flat-button color="accent" routerLink="/login">
+      <mat-icon>login</mat-icon> Se connecter
+    </button>
+  }
 </mat-toolbar>
 
-<mat-sidenav-container class="example-container">
+<mat-sidenav-container class="app-container">
   <mat-sidenav mode="side" opened class="app-sidenav">
-    
-    <div class="container">
-      <button mat-flat-button color="primary" routerLink="/home">Home</button>
-      <button mat-flat-button color="primary" 
-              (click)="genererDonneesDeTest()"
-      >
-        Peupler BD
-      </button>
-      
-      <a routerLink="/add" class="ajoutBtn">
-        <button mat-flat-button color="accent">Ajouter Assignment</button>
+
+    <div class="sidenav-header">
+      <mat-icon class="sidenav-icon">dashboard</mat-icon>
+      <span>Navigation</span>
+    </div>
+    <mat-divider></mat-divider>
+
+    <div class="sidenav-menu">
+      <a routerLink="/home" class="nav-item" routerLinkActive="nav-item-active"
+         [routerLinkActiveOptions]="{exact:true}">
+        <mat-icon>assignment</mat-icon>
+        <span>Assignments</span>
       </a>
+
+      @if(authService.isLogged()) {
+        <a routerLink="/add" class="nav-item nav-item-accent"
+           routerLinkActive="nav-item-active">
+          <mat-icon>add_circle_outline</mat-icon>
+          <span>Ajouter</span>
+        </a>
+      } @else {
+        <a routerLink="/login" class="nav-item" routerLinkActive="nav-item-active">
+          <mat-icon>login</mat-icon>
+          <span>Connexion</span>
+        </a>
+      }
+    </div>
+
+    @if(authService.isAdmin()) {
+      <mat-divider></mat-divider>
+      <div class="sidenav-section-title">Administration</div>
+      <div class="sidenav-menu">
+        <a routerLink="/users" class="nav-item nav-item-admin"
+           routerLinkActive="nav-item-active">
+          <mat-icon>manage_accounts</mat-icon>
+          <span>Utilisateurs</span>
+        </a>
+        <button class="nav-item nav-item-warn" (click)="seedUsers()">
+          <mat-icon>storage</mat-icon>
+          <span>Peupler la BD</span>
+        </button>
+      </div>
+    }
+
+    <div class="sidenav-footer">
+      <mat-icon>lock</mat-icon>
+      <span>JWT · bcrypt</span>
     </div>
   </mat-sidenav>
-  <mat-sidenav-content class="app-sidenav-content">
-    
 
-    <!-- la balise suivante dit : "fait le rendu du composant qui 
-    correspond à l'URL (la route) courante. Cette correspondance
-    est définie dans app.routes.ts " -->
-<router-outlet></router-outlet>
-
+  <mat-sidenav-content class="app-content">
+    <router-outlet></router-outlet>
   </mat-sidenav-content>
 </mat-sidenav-container>
-
-

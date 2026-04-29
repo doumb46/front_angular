@@ -1,35 +1,58 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
+import { APP_ENV } from './app-env';
 
-@Injectable({
-  providedIn: 'root',
-})
+export interface UserInfo {
+  _id?: string;
+  login: string;
+  role: 'user' | 'admin';
+  nom?: string;
+  photo?: string;
+}
+
+@Injectable({ providedIn: 'root' })
 export class AuthService {
-  // indique si on est loggué / authentifié ou pas
-  loggedIn = false;
+  private authUrl = APP_ENV.assignmentsApiUrl.replace('/assignments', '/auth');
 
-  logIn() {
-    this.loggedIn = true;
+  private _token: string | null = null;
+  private _currentUser: UserInfo | null = null;
+
+  constructor(private http: HttpClient) {
+    // Restaurer depuis sessionStorage au démarrage
+    this._token       = sessionStorage.getItem('jwt_token');
+    const storedUser  = sessionStorage.getItem('current_user');
+    if (storedUser) {
+      try { this._currentUser = JSON.parse(storedUser); }
+      catch { this._currentUser = null; }
+    }
   }
 
-  logOut() {
-    this.loggedIn = false;
+  // ── Connexion ─────────────────────────────────────────────────
+  loginHttp(login: string, password: string): Observable<any> {
+    return this.http.post<any>(`${this.authUrl}/login`, { login, password }).pipe(
+      tap(response => {
+        if (response?.token && response?.user) {
+          this._token       = response.token;
+          this._currentUser = response.user;
+          sessionStorage.setItem('jwt_token',    this._token!);
+          sessionStorage.setItem('current_user', JSON.stringify(this._currentUser));
+        }
+      })
+    );
   }
 
-  isLoggedIn(): boolean {
-    return this.loggedIn;
+  // ── Déconnexion ───────────────────────────────────────────────
+  logOut(): void {
+    this._token       = null;
+    this._currentUser = null;
+    sessionStorage.removeItem('jwt_token');
+    sessionStorage.removeItem('current_user');
   }
 
-  isAdmin() {
-    // dans une vraie application, on aurait une logique plus complexe pour 
-    // déterminer si l'utilisateur est admin ou pas, par exemple en regardant 
-    // son rôle dans un token JWT, ou en faisant un appel HTTP vers le backend 
-    // pour récupérer les infos de l'utilisateur connecté.
-
-    // pour l'instant, on considère que si on est loggué, on est admin
-    let promesse = new Promise<boolean>((resolve, reject) => {
-      resolve(this.loggedIn);
-    });
-
-    return promesse; 
-  }
+  // ── Accesseurs ────────────────────────────────────────────────
+  getToken():       string | null  { return this._token; }
+  getCurrentUser(): UserInfo | null { return this._currentUser; }
+  isLogged():       boolean { return this._token !== null && this._currentUser !== null; }
+  isAdmin():        boolean { return this._currentUser?.role === 'admin'; }
 }

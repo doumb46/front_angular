@@ -1,170 +1,104 @@
 import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-import { MatDividerModule } from '@angular/material/divider';
-import { MatButtonModule } from '@angular/material/button';
-import { MatListModule } from '@angular/material/list';
-import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule } from '@angular/material/paginator';
-
 import { Router, RouterLink } from '@angular/router';
+import { MatTableModule }    from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatButtonModule }   from '@angular/material/button';
+import { MatIconModule }     from '@angular/material/icon';
+import { MatTooltipModule }  from '@angular/material/tooltip';
+import { MatChipsModule }    from '@angular/material/chips';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDividerModule }  from '@angular/material/divider';
+import { MatBadgeModule }    from '@angular/material/badge';
 
-import { Rendu } from '../shared/rendu';
-import { NonRendu } from '../shared/non-rendu';
-import { ImportantDirective } from '../shared/important.directive';
 import { Assignment } from './assignment.model';
-import { AssignmentDetail } from './assignment-detail/assignment-detail';
-import { AddAssignment } from './add-assignment/add-assignment';
 import { AssignmentsService } from '../shared/assignments.service';
+import { AuthService } from '../shared/auth.service';
+import { ConfirmDialogComponent } from '../shared/confirm-dialog/confirm-dialog';
+
 @Component({
   selector: 'app-assignments',
+  standalone: true,
   imports: [
-    MatDividerModule,
-    Rendu,
-    NonRendu,
-    ImportantDirective,
-    AssignmentDetail,
-    MatListModule,
-    MatButtonModule,
-    CommonModule,
-    AddAssignment,
-    RouterLink,
-    MatTableModule,
-    MatPaginatorModule
+    CommonModule, RouterLink,
+    MatTableModule, MatPaginatorModule, MatButtonModule, MatIconModule,
+    MatTooltipModule, MatChipsModule, MatDialogModule, MatDividerModule, MatBadgeModule
   ],
   templateUrl: './assignments.html',
   styleUrl: './assignments.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Assignments implements OnInit {
   titre = 'Liste des Assignments';
-  ajoutActive = signal(true);
 
-  // Pour la pagination
-  page: number = 1;
-  limit: number = 10;
-  totalDocs: number = 0;
-  totalPages: number = 0;
-  pagingCounter: number = 1;
-  hasPrevPage: boolean = false;
-  hasNextPage: boolean = false;
-  prevPage:number = 1;
-  nextPage: number = 1;
+  page = 1; limit = 10;
+  totalDocs = 0; totalPages = 0;
+  hasPrevPage = false; hasNextPage = false;
+  prevPage = 1; nextPage = 1;
 
-  // Pour la data table
-  displayedColumns: string[] = ['assignment-nom', 'assignment-dateDeRendu', 'assignment-rendu'];
-
-
-  // un tableau avec une liste de devoirs (assignments en anglais)
   assignments = signal<Assignment[]>([]);
 
-  constructor(private assignmentsService: AssignmentsService,
-              private router: Router) {}
+  displayedColumns: string[] = [
+    'auteur', 'assignment-nom', 'matiere',
+    'assignment-dateDeRendu', 'note', 'assignment-rendu', 'actions'
+  ];
 
-  // appelée à l'initialisation du composant
-  // avant de faire l'affichage
-  ngOnInit(): void {
-    console.log('ngOnInit appelé !!!');
-    this.getAssignments();
-   
-    /*
-    // appelées à l'initialisation du composant
-    // avant de faire l'affichage, on peut faire des traitements pour 
-    // préparer les données etc.
+  constructor(
+    private assignmentsService: AssignmentsService,
+    public authService: AuthService,
+    private router: Router,
+    private dialog: MatDialog
+  ) {}
 
-    // Pour le moment, je m'en sers pour montre l'aspect "réactif" d'Angular : 
-    // après 3 secondes on va rendre le bouton enabled
-    setTimeout(() => {
-      this.ajoutActive.set(true);
-      console.log("Bouton d'ajout activé !!!");
-    }, 3000);
-
-    // et on va ajouter un devoir après 5 secondes
-    setTimeout(() => {
-      this.assignments.update(list => [
-        ...list,
-        {
-          nom: "NOUVEAU DEVOIR pour montrer la réactivité d'Angular !!!",
-          dateDeRendu: new Date("2026-04-30"),
-          rendu : false
-        }
-      ]);
-      console.log('Nouveau devoir ajouté !!!');
-    }, 5000);
-    */
-  }
+  ngOnInit(): void { this.getAssignments(); }
 
   getAssignments() {
-     this.assignmentsService.getAssignmentsPagine(this.page, this.limit)
-    .subscribe((data) => {
-      this.totalDocs = data.totalDocs;
-      this.totalPages = data.totalPages;
-      this.pagingCounter = data.pagingCounter;
+    this.assignmentsService.getAssignmentsPagine(this.page, this.limit).subscribe(data => {
+      this.totalDocs   = data.totalDocs;
+      this.totalPages  = data.totalPages;
       this.hasPrevPage = data.hasPrevPage;
       this.hasNextPage = data.hasNextPage;
-      this.prevPage = data.prevPage;
-      this.nextPage = data.nextPage;
-      // on ne rentre ici que lorsque les données observables renvoyées
-      // par getAssignments() sont disponibles, c'est à dire quel'appel
-      // HTTP est terminé et que les données sont arrivées.
-      // C'est pour ça que c'est mieux de faire l'appel HTTP dans un service,
-      // et pas dans le composant, pour gérer l'asynchronicité de l'appel HTTP.
+      this.prevPage    = data.prevPage;
+      this.nextPage    = data.nextPage;
       this.assignments.set(data.docs);
     });
   }
 
-  // any = en typescript, c'est un type générique qui peut représenter
-  // n'importe quel type de données. Typiquement, on l'utilise lorsque
-  // le type de données n'est pas connu à l'avance ou peut varier.
-  getColor(assignment: any) {
-    if (assignment.rendu) {
-      return 'green';
-    } else {
-      return 'red';
-    }
-  }
-
-  premierePage() {
-    this.page = 1;
-    this.getAssignments();
-  }
-
-  dernierePage() {
-    this.page = this.totalPages;
-    this.getAssignments();
-  }
-
-  pageSuivante() {
-    if (this.hasNextPage) {
-      this.page = this.nextPage;
-      this.getAssignments();
-    }
-  }
-
-  pagePrecedente() {
-    if (this.hasPrevPage) {
-      this.page = this.prevPage;
-      this.getAssignments();
-    }
-  }
-
-  changeNbAssignmentsParPage(nb: string) {
-    this.limit = parseInt(nb);
-    this.getAssignments();
-  }
-
-  // Appelé par le composant Paginator de Angular Material quand on change 
-  // de page
   pageChange(event: any) {
-    console.log("Page changed : ", event);
     this.limit = event.pageSize;
-    this.page = event.pageIndex + 1;
+    this.page  = event.pageIndex + 1;
     this.getAssignments();
   }
 
-  // Pour gérer le click sur les lignes du tableau (tr)
-  onRowClick(row: any) {
-    console.log("Row clicked : ", row);
+  onRowClick(row: Assignment) {
     this.router.navigate(['/assignments', row._id]);
+  }
+
+  onEdit(event: Event, row: Assignment) {
+    event.stopPropagation();
+    this.router.navigate(['/assignments', row._id, 'edit']);
+  }
+
+  onDelete(event: Event, row: Assignment) {
+    event.stopPropagation();
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      data: { nom: row.nom }
+    });
+    ref.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.assignmentsService.deleteAssignment(row).subscribe(() => this.getAssignments());
+      }
+    });
+  }
+
+  getRenduClass(rendu: boolean) {
+    return rendu ? 'chip-rendu' : 'chip-non-rendu';
+  }
+
+  getNoteColor(note: number | null | undefined): string {
+    if (note === null || note === undefined) return '#999';
+    if (note >= 14) return '#2e7d32';
+    if (note >= 10) return '#f57f17';
+    return '#c62828';
   }
 }

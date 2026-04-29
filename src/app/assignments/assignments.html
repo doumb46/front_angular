@@ -1,126 +1,126 @@
-    <h2>{{titre}}</h2>
-    <ul>
-        <li>Page courante : {{page}} / {{totalPages}}</li>
-        <li>Nb assignements total : {{totalDocs}}</li>
-        <li>Nb assignments par page : 
-            <input type="range" min="1" max="100"
-                    value = {{limit}}
-                   (input)="changeNbAssignmentsParPage($event.target.value)"
-            > 
-            {{limit}}</li>
+<div class="page-header">
+  <h2 class="page-title">
+    <mat-icon>assignment</mat-icon>
+    {{ titre }}
+    <span class="total-badge">{{ totalDocs }} devoir(s)</span>
+  </h2>
+  @if(authService.isLogged()) {
+    <a routerLink="/add">
+      <button mat-flat-button color="accent">
+        <mat-icon>add</mat-icon> Ajouter un devoir
+      </button>
+    </a>
+  }
+</div>
 
-    </ul>
-    <button mat-flat-button color="primary" 
-            (click)="premierePage()"
-    >
-            Première page
-    </button>
-    &nbsp; &nbsp;
-    <button mat-flat-button color="primary" 
-            (click)="pagePrecedente()"
-    >
-            Page précédente
-    </button>
-    &nbsp; &nbsp;
-    <button mat-flat-button color="primary" 
-            (click)="pageSuivante()"
-    >
-            Page suivante
-    </button>
-    &nbsp; &nbsp;
-    <button mat-flat-button color="primary" 
-            (click)="dernierePage()"
-    >
-            Dernière page
-    </button>
+<mat-divider></mat-divider>
 
-    <mat-paginator [length]="totalDocs"
-                   [pageSize]="limit"
-                   (page)="pageChange($event)"
-                   showFirstLastButtons = "true"
-                   [pageIndex]="page - 1"
-                   [pageSizeOptions]="[5, 10, 25, 100]"
-                   aria-label="Select page"
-        >
-    </mat-paginator>
+<table mat-table [dataSource]="assignments()" class="mat-elevation-z3 assignments-table">
 
-    <table mat-table 
-           [dataSource]="assignments()" class="mat-elevation-z8 demo-table"
-    >
- 
-        <!-- nom Column -->
-        <ng-container matColumnDef="assignment-nom">
-          <th mat-header-cell *matHeaderCellDef> Nom </th>
-          <td mat-cell *matCellDef="let element"> {{element.nom}} </td>
-        </ng-container>
+  <!-- Colonne Auteur -->
+  <ng-container matColumnDef="auteur">
+    <th mat-header-cell *matHeaderCellDef>Élève</th>
+    <td mat-cell *matCellDef="let a">
+      <div class="cell-author">
+        @if(a.photoAuteur) {
+          <img [src]="a.photoAuteur" class="avatar-sm" [alt]="a.auteur" />
+        } @else {
+          <mat-icon class="avatar-icon">person</mat-icon>
+        }
+        <span>{{ a.auteur || '—' }}</span>
+      </div>
+    </td>
+  </ng-container>
 
-        <!-- dateDeRendu Column -->
-        <ng-container matColumnDef="assignment-dateDeRendu">
-            <th mat-header-cell *matHeaderCellDef> Date de rendu </th>
-            <td mat-cell *matCellDef="let element"> {{element.dateDeRendu | date:'dd/MM/yyyy'}} </td>
-        </ng-container>
+  <!-- Colonne Nom -->
+  <ng-container matColumnDef="assignment-nom">
+    <th mat-header-cell *matHeaderCellDef>Devoir</th>
+    <td mat-cell *matCellDef="let a">
+      <span class="nom-devoir">{{ a.nom }}</span>
+    </td>
+  </ng-container>
 
-  <!-- rendu Column -->
+  <!-- Colonne Matière -->
+  <ng-container matColumnDef="matiere">
+    <th mat-header-cell *matHeaderCellDef>Matière</th>
+    <td mat-cell *matCellDef="let a">
+      <div class="cell-matiere">
+        @if(a.imageMatiere) {
+          <img [src]="a.imageMatiere" class="matiere-icon" [alt]="a.matiere" />
+        }
+        <span>{{ a.matiere || '—' }}</span>
+      </div>
+    </td>
+  </ng-container>
+
+  <!-- Colonne Date -->
+  <ng-container matColumnDef="assignment-dateDeRendu">
+    <th mat-header-cell *matHeaderCellDef>Date de rendu</th>
+    <td mat-cell *matCellDef="let a">{{ a.dateDeRendu | date:'dd/MM/yyyy' }}</td>
+  </ng-container>
+
+  <!-- Colonne Note -->
+  <ng-container matColumnDef="note">
+    <th mat-header-cell *matHeaderCellDef>Note /20</th>
+    <td mat-cell *matCellDef="let a">
+      @if(a.note !== null && a.note !== undefined) {
+        <span class="note-badge" [style.background]="getNoteColor(a.note)">
+          {{ a.note }}/20
+        </span>
+      } @else {
+        <span class="note-na">—</span>
+      }
+    </td>
+  </ng-container>
+
+  <!-- Colonne Rendu -->
   <ng-container matColumnDef="assignment-rendu">
-    <th mat-header-cell *matHeaderCellDef> Rendu ? </th>
-    <td mat-cell *matCellDef="let element"> {{element.rendu ? 'Oui' : 'Non'}} </td>
+    <th mat-header-cell *matHeaderCellDef>Statut</th>
+    <td mat-cell *matCellDef="let a">
+      <span class="status-chip" [class.chip-rendu]="a.rendu" [class.chip-non-rendu]="!a.rendu">
+        <mat-icon class="chip-icon">{{ a.rendu ? 'check_circle' : 'schedule' }}</mat-icon>
+        {{ a.rendu ? 'Rendu' : 'En attente' }}
+      </span>
+    </td>
+  </ng-container>
+
+  <!-- Colonne Actions -->
+  <ng-container matColumnDef="actions">
+    <th mat-header-cell *matHeaderCellDef>Actions</th>
+    <td mat-cell *matCellDef="let a">
+      <div class="action-btns">
+        <button mat-icon-button color="primary" matTooltip="Voir les détails"
+                (click)="onRowClick(a)">
+          <mat-icon>visibility</mat-icon>
+        </button>
+        @if(authService.isAdmin()){
+        <button mat-icon-button color="accent" matTooltip="Modifier"
+                [disabled]="!authService.isAdmin()"
+                (click)="onEdit($event, a)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" matTooltip="Supprimer"
+                [disabled]="!authService.isAdmin()"
+                (click)="onDelete($event, a)">
+          <mat-icon>delete</mat-icon>
+        </button>
+        }
+      </div>
+    </td>
   </ng-container>
 
   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-  <tr mat-row 
-      *matRowDef="let row; columns: displayedColumns;"
-      (click)="onRowClick(row)"
-  >
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+      (click)="onRowClick(row)" class="clickable-row">
   </tr>
 </table>
-<mat-paginator [length]="totalDocs"
-                   [pageSize]="limit"
-                   (page)="pageChange($event)"
-                   showFirstLastButtons = "true"
-                   [pageIndex]="page - 1"
-                   [pageSizeOptions]="[5, 10, 25, 100]"
-                   aria-label="Select page"
-        >
-    </mat-paginator>
 
-
-    <mat-divider></mat-divider>
-    <mat-list></mat-list>
-    @for(a of assignments(); track a.nom) {
-        <h3 matList-subheader>{{a.dateDeRendu | date:'dd/MM/yyyy'}}</h3>
-        <a routerLink="/assignments/{{a._id}}">
-            <mat-list-item >
-                <div matListItemTitle>{{a.nom}}</div>
-                @if(a.rendu) {
-                    <p appRendu matListItemLine>A été rendu.
-                    </p>
-                } @else {
-                    <p appNonRendu matListItemLine>N'a pas été rendu.
-                    </p>
-                }
-            </mat-list-item>
-        </a> 
-        <mat-divider></mat-divider>
-    }
-<!--
-<h2 appImportant>Avec tableau</h2>
-<mat-divider></mat-divider>
-<table>
-    <tr>
-        <th>Nom</th>
-        <th>Date de rendu</th>
-        <th>Rendu ?</th>
-    </tr>
-    <tbody>
-@for(assignment of assignments(); track assignment.nom) {
-  <tr>
-    <td>{{assignment.nom}}</td>
-    <td>{{assignment.dateDeRendu}}</td>
-    <td>Rendu : {{assignment.rendu ? 'Oui' : 'Non'}}</td>
-    <mat-divider></mat-divider>
-  </tr>
-}
-</tbody>
-</table>
-
--->
+<mat-paginator
+  [length]="totalDocs"
+  [pageSize]="limit"
+  [pageIndex]="page - 1"
+  [pageSizeOptions]="[5, 10, 25, 50]"
+  showFirstLastButtons
+  (page)="pageChange($event)"
+  aria-label="Sélectionner une page">
+</mat-paginator>

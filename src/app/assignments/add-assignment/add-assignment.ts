@@ -1,71 +1,92 @@
-import { Component, output, signal } from '@angular/core';
-
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatButtonModule } from '@angular/material/button';
-
-import { provideNativeDateAdapter } from '@angular/material/core';
+import { Component, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
-import { Assignment } from '../assignment.model';
+import { MatDatepickerModule }  from '@angular/material/datepicker';
+import { MatInputModule }       from '@angular/material/input';
+import { MatFormFieldModule }   from '@angular/material/form-field';
+import { MatButtonModule }      from '@angular/material/button';
+import { MatSelectModule }      from '@angular/material/select';
+import { MatIconModule }        from '@angular/material/icon';
+import { MatCardModule }        from '@angular/material/card';
+import { MatDividerModule }     from '@angular/material/divider';
+import { MatSliderModule }      from '@angular/material/slider';
+import { provideNativeDateAdapter } from '@angular/material/core';
+
+import { Assignment, MATIERES, MatiereInfo } from '../assignment.model';
 import { AssignmentsService } from '../../shared/assignments.service';
+import { AuthService }        from '../../shared/auth.service';
 
 @Component({
   selector: 'app-add-assignment',
-  imports: [MatDatepickerModule, MatInputModule, MatFormFieldModule,
-     MatButtonModule, FormsModule],
-  templateUrl: './add-assignment.html',
-  styleUrl: './add-assignment.css',
+  standalone: true,
+  imports: [
+    CommonModule, FormsModule,
+    MatDatepickerModule, MatInputModule, MatFormFieldModule,
+    MatButtonModule, MatSelectModule, MatIconModule,
+    MatCardModule, MatDividerModule, MatSliderModule
+  ],
   providers: [provideNativeDateAdapter()],
+  templateUrl: './add-assignment.html',
+  styleUrl: './add-assignment.css'
 })
 export class AddAssignment {
-  // Pour les champs du formulaire d'ajout d'un devoir
-  nomDevoir = signal('');
-  // Je veux une date de rendu "vide" par défaut
-  dateDeRendu = signal(new Date());
+  matieres = MATIERES;
 
-  // on utilise output pour transmettre le nouvel assignment créé vers 
-  // le composant parent. "assignmentAjoute" correspond à 
-  // (assignmentAjoute)="ajoutAssignment($event)" dans le template du 
-  // composant parent. assignementAjoute est un evenement custom
-  // que je crée pour transmettre le nouvel assignment créé vers le
-  // composant parent. On utilisera la méthode emit() pour émettre cet événement avec le nouvel assignment à transmettre
-  // voir la méthode onSubmit() ci-dessous pour l'utilisation de emit()
-  assignmentAjoute = output<Assignment>();
+  nom          = signal('');
+  dateDeRendu  = signal<Date | null>(null);
+  auteur       = signal('');
+  matiereChoisie = signal<MatiereInfo | null>(null);
+  note         = signal<number | null>(null);
+  remarques    = signal('');
 
-  constructor(private assignementService: AssignmentsService,
-              private router: Router) {}
+  envoiEnCours = signal(false);
+  erreur       = signal('');
 
-  onSubmit(event:any) {
-      console.log("Form submitted !!!");
-      // on ajoute () à la fin de this.nomDevoir pour récupérer la valeur 
-      // actuelle du signal !
-      console.log("Nom du devoir : ", this.nomDevoir());
-      console.log("Date de rendu : ", this.dateDeRendu());
-  
-      // on peut faire l'ajout :
-      // on crée un nouvel objet de type Assignment
-      const newAssignment= new Assignment();
-      newAssignment.nom = this.nomDevoir();
-      newAssignment.dateDeRendu = this.dateDeRendu();
-      newAssignment.rendu = false; 
-   
-      // On utilise le service pour ajouter le devoir à la liste des devoirs
-      this.assignementService.addAssignment(newAssignment)
-      .subscribe(result => {
-        console.log(result);
+  constructor(
+    private assignmentsService: AssignmentsService,
+    private authService: AuthService,
+    private router: Router
+  ) {
+    // Pré-remplir l'auteur avec le nom de l'utilisateur connecté
+    const user = this.authService.getCurrentUser();
+    if (user?.nom) this.auteur.set(user.nom);
+  }
 
-        // On prévient le père pour ajouter le devoir à la liste des devoirs affichés
-        //this.assignmentAjoute.emit(newAssignment); // on émet le nouvel assignment
-      
-        // ici on va devoir faire une navigation "par programme" 
-        // vers la page d'accueil (la liste des devoirs), 
-        // pour revenir à la liste après l'ajout du devoir.
-        this.router.navigate(['/']);
-      });
-  
+  onMatiereChange(m: MatiereInfo) {
+    this.matiereChoisie.set(m);
+  }
+
+  onSubmit() {
+    if (!this.nom() || !this.dateDeRendu()) {
+      this.erreur.set('Le nom et la date de rendu sont obligatoires.');
+      return;
     }
-  
+    this.envoiEnCours.set(true);
+    this.erreur.set('');
+
+    const a = new Assignment();
+    a.nom         = this.nom();
+    a.dateDeRendu = this.dateDeRendu()!;
+    a.rendu       = false;
+    a.auteur      = this.auteur();
+    a.note        = this.note();
+    a.remarques   = this.remarques();
+
+    const m = this.matiereChoisie();
+    if (m) {
+      a.matiere      = m.nom;
+      a.imageMatiere = m.image;
+      a.nomProf      = m.prof;
+      a.photoProf    = m.photoProf;
+    }
+
+    this.assignmentsService.addAssignment(a).subscribe({
+      next: () => { this.envoiEnCours.set(false); this.router.navigate(['/']); },
+      error: err => { this.envoiEnCours.set(false); this.erreur.set(err?.error?.error || 'Erreur lors de la création.'); }
+    });
+  }
+
+  annuler() { this.router.navigate(['/']); }
 }
