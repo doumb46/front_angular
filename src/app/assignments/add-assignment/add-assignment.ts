@@ -46,12 +46,13 @@ export class AddAssignment {
 
   constructor(
     private assignmentsService: AssignmentsService,
-    private authService: AuthService,
+    protected authService: AuthService,
     private router: Router
   ) {
     // Pré-remplir l'auteur avec le nom de l'utilisateur connecté
     const user = this.authService.getCurrentUser();
     if (user?.nom) this.auteur.set(user.nom);
+    this.authService.isAdmin();
   }
 
   onMatiereChange(m: MatiereInfo) {

@@ -84,6 +84,7 @@
         }
 
         <!-- ── Section Évaluation ── -->
+        @if(authService.isAdmin()) {
         <div class="section-title span-2">
           <mat-icon>grade</mat-icon> Évaluation
         </div>
@@ -95,7 +96,7 @@
                  [ngModel]="note()" (ngModelChange)="note.set($event !== '' ? +$event : null)"
                  placeholder="0 – 20" />
         </mat-form-field>
-
+        }
         <mat-form-field appearance="outline" class="span-2">
           <mat-label>Remarques</mat-label>
           <mat-icon matPrefix>comment</mat-icon>
